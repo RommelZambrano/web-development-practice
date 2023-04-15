@@ -1,54 +1,55 @@
 import { useTasks } from "@/context/TaskContext";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useForm } from " ";
+import { toast } from "react-hot-toast";
+
 export default function CreateTask({ params }) {
-  const [task, setTask] = useState({
-    title: "",
-    description: "",
-  });
-  const { tasks, createTask } = useTasks();
+  const { tasks, createTask, updateTask } = useTasks();
 
   const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm();
 
-  const handleChange = (e) => {
-    setTask({ ...task, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    createTask(task.title, task.description);
+  const onSubmit = handleSubmit((data) => {
+    if (params.id) {
+      updateTask(params.id, data);
+      toast.success("Task updated successfully")
+    } else {
+      createTask(data.title, data.description);
+      toast.success("Task created successfully");
+    }
     router.push("/");
-  };
+  });
 
   useEffect(() => {
     if (params.id) {
-      console.log(params.id);
       const taskFound = tasks.find((task) => task.id === params.id);
 
-      if (taskFound)
-        setTask({
-          title: taskFound.title,
-          description: taskFound.description,
-        });
+      if (taskFound) {
+        setValue("title", taskFound.title);
+        setValue("description", taskFound.description);
+      }
     }
-  }, [ params.id, tasks]);
+  }, [params.id, tasks]);
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={onSubmit}>
       <input
-        name="title"
-        type="text"
         placeholder="Write a title"
-        onChange={handleChange}
-        value={task.title}
+        {...register("title", { required: true })}
       />
+      {errors.title && <span>This field is required</span>}
       <textarea
-        name="description"
         placeholder="Write a description"
-        onChange={handleChange}
-        value={task.description}
+        {...register("description", { required: true })}
       />
-      <button type="submit">Create</button>
+      {errors.description && <span>This field is required</span>}
+      <button type="submit">{params.id ? "Update Task" : "Create Task"}</button>
     </form>
   );
 }

@@ -1,6 +1,8 @@
 import style from "./stylesCard.module.css";
 import { useRouter } from "next/navigation";
 import { useTasks } from "@/context/TaskContext";
+import { toast } from "react-hot-toast";
+
 
 export default function TaskCard({ task }) {
   const router = useRouter();
@@ -8,10 +10,11 @@ export default function TaskCard({ task }) {
 
   const handleDelete = (e) => {
     e.stopPropagation();
-    const confirm = window.confirm(
-      "Are you sure you want to delete this task?"
-    );
-    if (confirm) deleteTask(task.id);
+    const confirm = window.confirm("are you sure") 
+    if (confirm) {
+      
+      deleteTask(task.id)
+      toast.success("Task deleted successfully")};
   };
 
   return (
